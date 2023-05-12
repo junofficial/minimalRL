@@ -30,8 +30,8 @@ class Policy(nn.Module):
         R = 0
         self.optimizer.zero_grad()
         for r, prob in self.data[::-1]:
-            R = r + gamma * R
-            loss = -torch.log(prob) * R
+            R = r + gamma * R # 뒤로 갈수록 감마에 제곱
+            loss = -torch.log(prob) * R #gradien 어센트여서 -  
             loss.backward()
         self.optimizer.step()
         self.data = []
@@ -48,11 +48,11 @@ def main():
         done = False
         
         while not done: # CartPole-v1 forced to terminates at 500 step.
-            prob = pi(torch.from_numpy(s).float())
-            m = Categorical(prob)
-            a = m.sample()
-            s_prime, r, done, truncated, info = env.step(a.item())
-            pi.put_data((r,prob[a]))
+            prob = pi(torch.from_numpy(s).float()) #state가 4차원 벡터 [막대 각도,차 속도,막대 각속도,차 가속도]를 policy pi에 넣어서 확률분포
+            m = Categorical(prob) #카테고리칼은 파이토치에서 지원하는 확률분포
+            a = m.sample() # action이 나옴 확률에 비례해서 하나를 뽑아줌
+            s_prime, r, done, truncated, info = env.step(a.item()) #env에 action을 던져줌 action이 tensor이기에 스칼라형태로 바꾸기 위해 .item
+            pi.put_data((r,prob[a])) #reinforce는 에피소드가 끝나여 학습이 가능 그래서 값을 폴리시에 모아놓음 reward와 그때의 action log파이(s,a)
             s = s_prime
             score += r
             
