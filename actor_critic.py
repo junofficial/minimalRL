@@ -75,9 +75,9 @@ def main():
         s, _ = env.reset()
         while not done:
             for t in range(n_rollout):
-                prob = model.pi(torch.from_numpy(s).float())
+                prob = model.pi(torch.from_numpy(s).float()) # numpy를 pytorch
                 m = Categorical(prob)
-                a = m.sample().item()
+                a = m.sample().item() #.item은 그냥 써버리면은 같이 업데이트가 되버려가지고 업데이트 되지 말아
                 s_prime, r, done, truncated, info = env.step(a)
                 model.put_data((s,a,r,s_prime,done))
                 
